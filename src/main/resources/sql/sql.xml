@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="test">
+  <select id="login" parameterType="com.java.web.Login" resultType="com.java.web.Login">
+    select id,pw from login where id=#{id} and pw=#{pw}
+  </select>
+  
+   <select id="content" resultType="com.java.web.Bean">
+   select no,title,val,writer from content where delYn='N'
+  </select>
+  
+  <insert id="insert" parameterType="String">
+  	insert into content (title,val,writer) values (#{title},#{val},#{writer})
+  </insert>
+  <update id="update" parameterType="com.java.web.Bean">
+  	update content set val=#{val} where no=#{no}
+  </update>
+  
+  <update id="delete" parameterType="com.java.web.Bean">
+  	update content set delYn='Y' where no=#{no}
+  </update>
+  
+  <select id="detail" parameterType="int" resultType="com.java.web.Bean">
+ 	 select no,title,val,writer from content where no=#{no} and delYn='N'
+  </select>
+  
+  <update id="updateDetail" parameterType="com.java.web.Bean" >
+  	update content set title=#{title}, val=#{val} where no=#{no} and delYn='N'
+  </update>
+  
+  <update id="deleteDetail" parameterType="com.java.web.Bean" >
+	update content set delYn='Y' where no=#{no}
+  </update>
+  
+</mapper>
