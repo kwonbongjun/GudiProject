@@ -3,6 +3,10 @@
 		display:inline-block;
 		height:100px;
 	}
+	.blk{
+	display:block;
+		height:50px;
+	}
 	#list {
 		
 	}
@@ -14,3 +18,4 @@
 		width: 80%;
 		height: 500px;	
 	}
+	

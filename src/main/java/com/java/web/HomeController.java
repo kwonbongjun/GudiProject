@@ -1,9 +1,14 @@
 package com.java.web;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -21,6 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -28,6 +34,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +42,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
 import net.sf.json.JSONObject;
 
@@ -89,15 +98,24 @@ public class HomeController {
 			return "detail";
 		}
 		try {
-			List<Bean> list=ns.contentRead();
+			int pageNum=1;
+			if(request.getParameter("pageNum")!=null){
+				pageNum=Integer.parseInt(request.getParameter("pageNum"));
+			}
+			int total=ns.contentReadAll();
+			request.setAttribute("total", total);
+			System.out.println(total);
+			List<Bean> list=ns.contentRead(pageNum);
+			int page=0;
 			if(list.size()>0) {
 			request.setAttribute("list", list);
-
+				
 			}
 		}catch(Exception e) {
 			e.printStackTrace();
 			
 		}
+		
 		
 		return "home";
 	}
@@ -120,21 +138,45 @@ public class HomeController {
 		}
 		return "redirect:/";
 	}
-	@RequestMapping("/create")
-	public String create(HttpServletRequest request, HttpServletResponse response) {
+	@RequestMapping(value="/create", method = RequestMethod.POST)
+	public String create(@RequestParam("file") MultipartFile[] files, HttpServletRequest request, HttpServletResponse response) {
 		String title=request.getParameter("title");
 		String val=request.getParameter("val");
 		String writer=nm;
-		
+		String originalFileName="";
+		String fileName="";
+		String ext="";
+		if(!"".equals(files[0].getOriginalFilename())) {
+		for(int i=0;i<files.length;i++) {
+			MultipartFile file = files[i];
+			originalFileName=file.getOriginalFilename();
+			ext=originalFileName.substring(originalFileName.lastIndexOf("."), originalFileName.length());
+			fileName=UUID.randomUUID().toString();
+			try {
+				byte[] data=file.getBytes();
+				String path="D:\\workspace\\resources\\";//D:\\workspace\\resources\\";
+				File f = new File(path);
+				if(!f.isDirectory()) {
+					f.mkdirs();
+				}
+				OutputStream os = new FileOutputStream(new File(path+fileName+ext));
+				os.write(data);
+				os.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		}
 		System.out.println(title+","+val+","+writer);
-		Bean bean=new Bean(title,val,writer);
+		Bean bean=new Bean(title,val,writer,originalFileName,fileName,ext);
 		ns.createContent(bean);
 		return "redirect:/";
 	}
 
 	@RequestMapping(value = "/update", method = RequestMethod.POST)
-	public String update(HttpServletRequest request, HttpServletResponse response) {
-		String no="";
+	public String update(@RequestParam("file") MultipartFile[] files,HttpServletRequest request, HttpServletResponse response) {
+		int no=0;
 		try {
 			request.setCharacterEncoding("utf-8");
 		} catch (UnsupportedEncodingException e) {
@@ -142,13 +184,41 @@ public class HomeController {
 		}
 		System.out.println(request.getParameter("no"));
 		if(request.getParameter("no")!=null) {
-		no=(request.getParameter("no"));
+		no=Integer.parseInt(request.getParameter("no"));
 		String val=request.getParameter("val");
 		String title=request.getParameter("title");
 
-		Bean bean=new Bean();
-		bean.update(no, title, val);
+
+//		bean.update(no, title, val);
 		System.out.println(no+","+val);
+		
+		String originalFileName="";
+		String fileName="";
+		String ext="";
+		if(!"".equals(files[0].getOriginalFilename())) {
+		for(int i=0;i<files.length;i++) {
+			MultipartFile file = files[i];
+			originalFileName=file.getOriginalFilename();
+			System.out.println(originalFileName);
+			ext=originalFileName.substring(originalFileName.lastIndexOf("."), originalFileName.length());
+			fileName=UUID.randomUUID().toString();
+			try {
+				byte[] data=file.getBytes();
+				String path="D:\\workspace\\resources\\";//"D:\\workspace\\resources\\";
+				File f = new File(path);
+				if(!f.isDirectory()) {
+					f.mkdirs();
+				}
+				OutputStream os = new FileOutputStream(new File(path+fileName+ext));
+				os.write(data);
+				os.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		}
+		Bean bean=new Bean(no,title,val,originalFileName,fileName,ext);
 		ns.updateDetail(bean);
 		}
 		return "redirect:/?boardNum="+no;
@@ -179,7 +249,7 @@ public class HomeController {
 				try {
 					//http://gdj16.gudi.kr:20003/KakaoBack 
 					String url="https://kauth.kakao.com/oauth/authorize?client_id=ed94698d2dd2bbca37dbb1ad2cd5ae87"
-							+ "&redirect_uri="+URLEncoder.encode("http://localhost:8080/KakaoBack","UTF-8")
+							+ "&redirect_uri="+URLEncoder.encode("http://gdj16.gudi.kr:20003/KakaoBack","UTF-8")
 							+ "&response_type=code";
 					System.out.println(request.getParameter("code"));
 					response.sendRedirect(url);
@@ -201,7 +271,7 @@ public class HomeController {
 			String url="https://kauth.kakao.com/oauth/token"
 					 +"?grant_type=authorization_code"
 					 +"&client_id=ed94698d2dd2bbca37dbb1ad2cd5ae87"
-					 +"&redirect_uri="+URLEncoder.encode("http://localhost:8080/KakaoBack","UTF-8")
+					 +"&redirect_uri="+URLEncoder.encode("http://gdj16.gudi.kr:20003/KakaoBack","UTF-8")
 					 +"&code="+request.getParameter("code");
 			URL uri = new URL(url);
 			HttpURLConnection conn = (HttpURLConnection) uri.openConnection();
@@ -302,6 +372,29 @@ public class HomeController {
 		}
 		return "redirect:https://developers.kakao.com/logout";
 	}
+	@RequestMapping("/download")
+	public void download(HttpServletRequest request, HttpServletResponse response){	
+		 	int no=Integer.parseInt(request.getParameter("boardnum"));
+			Bean detail=ns.detailRead(no);
+			String path="D:\\workspace\\resources\\";//"D:\\workspace\\resources\\"; 
+			String originalFilename=detail.getFileName();
+			System.out.println(originalFilename);
+			String fileName=detail.getFileurl();
+			String ext=detail.getExt();
+			try {
+				InputStream input = new FileInputStream(path+fileName+ext);
+				OutputStream output = response.getOutputStream();
+				IOUtils.copy(input, output);
+				response.setHeader("content-Disposition", "attachment;filename=\""+(originalFilename)+"\"");
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			}catch (IOException e) {
+				e.printStackTrace();
+			}
+			
+	}
+	 
+	 
 	
 	private static final Logger logger = LoggerFactory.getLogger(HomeController.class);
 	

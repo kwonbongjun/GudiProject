@@ -10,9 +10,12 @@
    <select id="content" resultType="com.java.web.Bean">
    select no,title,val,writer from content where delYn='N'
   </select>
-  
+     <select id="contentall" resultType="int">
+   select count(*) from content where delYn='N'
+  </select>
+    
   <insert id="insert" parameterType="String">
-  	insert into content (title,val,writer) values (#{title},#{val},#{writer})
+  	insert into content (title,val,writer,filename,fileURL,ext) values (#{title},#{val},#{writer},#{fileName},#{fileurl},#{ext})
   </insert>
   <update id="update" parameterType="com.java.web.Bean">
   	update content set val=#{val} where no=#{no}
@@ -23,11 +26,11 @@
   </update>
   
   <select id="detail" parameterType="int" resultType="com.java.web.Bean">
- 	 select no,title,val,writer from content where no=#{no} and delYn='N'
+ 	  select no,title,val,writer,fileName,fileurl,ext from content where no=#{no} and delYn='N'
   </select>
   
   <update id="updateDetail" parameterType="com.java.web.Bean" >
-  	update content set title=#{title}, val=#{val} where no=#{no} and delYn='N'
+  	update content set title=#{title}, val=#{val}, filename=#{fileName},fileURL=#{fileurl},ext=#{ext}  where no=#{no} and delYn='N'
   </update>
   
   <update id="deleteDetail" parameterType="com.java.web.Bean" >
