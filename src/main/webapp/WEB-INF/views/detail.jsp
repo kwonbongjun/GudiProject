@@ -48,6 +48,12 @@ function file_Event(obj){
 	//obj.files = dt.files;
 	//console.log(obj.files); 
 } 
+function formCheck() {
+	if(document.getElementsByTagName("form")[0].getElementsByTagName("input")[1].value==""
+			|| document.getElementsByTagName("form")[0].getElementsByTagName("input")[2].value=="" ) {
+		return false;
+	}
+}
 </script>
 </head>
 <body onload="load()">
@@ -59,8 +65,8 @@ function file_Event(obj){
 			<input id="val" class="text" type="text" name="val">
 			<% if(detail!=null){%><a href="/download?boardnum=<%=no%>"><%=detail.getFileName()%></a><%} %>
 			<input id="file" type="file" name="file" multiple="multiple"  onchange="file_Event(this)">
-			<input type="submit"  <%if(session.getAttribute("login")!=null){%>formaction="/create" value="추가" method="POST"<%}%>>
-			<input type="submit"  <%if(session.getAttribute("login")!=null){%>formaction="/update" value="업데이트" method="POST"<%}%>method="GET" onclick="loginCheck()" value="업데이트">
+			<input type="submit"  <%if(session.getAttribute("login")!=null){%>formaction="/create" value="추가" method="POST" onclick="return formCheck()"<%}%>>
+			<input type="submit"  <%if(session.getAttribute("login")!=null){%>formaction="/update" value="업데이트" method="POST"<%}%>method="GET" onsubmit="formCheck()" value="업데이트">
 			<input type="submit"  <%if(session.getAttribute("login")!=null){%>formaction="/delete" value="삭제" method="POST"<%}%>method="GET" onclick="loginCheck()" value="삭제">
 			<button type="button" formaction="/" onclick="load()">뒤로가기</button>
 		</form>

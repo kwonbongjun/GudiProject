@@ -98,8 +98,7 @@ if(<%=session.getAttribute("login")%>!=null) {
 		}); */
 	alert("로그인 성공");
 }else{
-	alert("로그인 실패");
-	}
+
 }
 function loginCheck() {
 	alert("로그인필요");
@@ -124,7 +123,7 @@ function viewchange(){
 	</script>
 	<form id="content">
 		<input type="text" name="no" >
-		<input type="text" name="val">
+		<input type="password" name="val">
 <%-- 		<%if(session.getAttribute("login")!=null){%><input type="hidden" name="writer" value=<%=user.getId()%>><%} %> --%>
 		<input type="submit"  <%if(session.getAttribute("login")!=null){%>formaction="/create" value="추가"<%}else{%> method="GET" onclick="loginCheck()" value="추가" <% }%>>
 		<input type="submit"  <%if(session.getAttribute("login")!=null){%>formaction="/update" value="업데이트"<%}else{%>method="GET" onclick="loginCheck()" value="업데이트"<%} %>>
@@ -137,23 +136,23 @@ function viewchange(){
 		<%-- <input type="submit"  <%if(session.getAttribute("login")==null){%>formaction="/kakao" value="카카오"<%}else{%> method="GET" onclick="loginCheck()" value="추가" <% }%>> --%>
 	</form>
 	 <%if(session.getAttribute("login")!=null){%><button type="button"><a href="/?boardNum=<%if(list!=null){%><%=list.get(list.size()-1).getNo()+1%><%}else{%><%=1%><%}%>">입력</a></button><%}; %>
-	<ul>
+	<table>
+	<tbody>
 	<% 
 		for(int i=0;i<a;i++) {
 		
-		%>
-		<div class="blk">
-		<input type="checkbox" name="check"  id="check" onclick="check(<%=i%>)">	
-		<li class="content"><%=list.get(i).getNo()%></li>
-		<%if(session.getAttribute("login")!=null){%><li class="content"><a href="/?boardNum=<%=list.get(i).getNo()%>"><%=list.get(i).getTitle() %></a></li><%}else{ %>
-		<li class="content"><%=list.get(i).getTitle() %></li><%} %>
-		<li class="content"><%=list.get(i).getWriter()%></li>
+		%><tr>
+		<%-- <input type="checkbox" name="check"  id="check" onclick="check(<%=i%>)"> --%>	
+		<td><%=list.get(i).getNo()%></td>
+		<%if(session.getAttribute("login")!=null){%><td><a href="/?boardNum=<%=list.get(i).getNo()%>"><%=list.get(i).getTitle() %></a></td><%}else{ %>
+		<td><%=list.get(i).getTitle() %></td><%} %>
+		<td><%=list.get(i).getWriter()%></td>
 		<%-- <li class="content"><%=request.getAttribute("user")%></li> --%>
-		</div>
+		</tr>
 		<%}
 	%>
-	</ul>
-	</div>
+	</tbody>
+	</table>
 
 	
 </body>
